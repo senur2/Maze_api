@@ -1,4 +1,4 @@
-package Proto;
+package Src;
 
 import java.util.ArrayList;
 import java.util.Random;

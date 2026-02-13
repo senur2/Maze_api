@@ -1,4 +1,4 @@
-package Proto;
+package Src;
 
 public class Arrete {
     private final Noeud n1;
