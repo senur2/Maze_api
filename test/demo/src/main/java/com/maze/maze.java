@@ -1,6 +1,7 @@
 package com.maze;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.function.Consumer;
 import java.util.Random;
@@ -169,5 +170,32 @@ public void sidewing(int odd, int e) {
             }
         }
     }
+}
+
+public void braid(double p) {
+    eachCell(cell -> {
+        // Un cul-de-sac est une cellule avec un seul lien
+        if (cell.links().size() == 1) {
+            // Optionnel : n'agir que selon une probabilité p
+            if (new Random().nextDouble() > p) return;
+
+            // Trouver les voisins non encore liés
+            List<cell> neighbors = cell.neighbors();
+            neighbors.removeIf(n -> cell.isLinked(n));
+
+            if (!neighbors.isEmpty()) {
+                // Créer un lien supplémentaire vers un voisin aléatoire
+                cell neighbor = neighbors.get(new Random().nextInt(neighbors.size()));
+                cell.link(neighbor);
+                
+                // Maintenir la symétrie pour Pacman
+                cell symCell = get((rows - 1) - cell.row, cell.column);
+                cell symNeighbor = get((rows - 1) - neighbor.row, neighbor.column);
+                if (symCell != null && symNeighbor != null) {
+                    symCell.link(symNeighbor);
+                }
+            }
+        }
+    });
 }
 }
