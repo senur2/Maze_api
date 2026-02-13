@@ -106,6 +106,14 @@ public cell get(int row, int column) {
         return grid[row][column];
     }
 
+public int getRows() {
+        return rows;
+    }
+
+public int getColumns() {
+        return columns;
+    }
+
 public cell randomCell() {
         int row = random.nextInt(rows);
         int col = random.nextInt(columns);
