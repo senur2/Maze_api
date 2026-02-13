@@ -4,8 +4,8 @@ public class Main {
     public static void main(String[] args) {
         try {
             maze maze = new maze(30, 30);
-            maze.sidewing(30, 3);
-            maze.braid(20);
+            maze.sidewing(45, 5);
+            maze.smartBraid();
             Benchmark benchmark = new Benchmark(maze);
             benchmark.print();
             maze.renderMaze(20);

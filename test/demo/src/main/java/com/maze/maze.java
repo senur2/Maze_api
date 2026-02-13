@@ -1,6 +1,7 @@
 package com.maze;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Consumer;
@@ -180,30 +181,67 @@ public void sidewing(int odd, int e) {
     }
 }
 
-public void braid(double p) {
-    eachCell(cell -> {
-        // Un cul-de-sac est une cellule avec un seul lien
-        if (cell.links().size() == 1) {
-            // Optionnel : n'agir que selon une probabilité p
-            if (new Random().nextDouble() > p) return;
-
-            // Trouver les voisins non encore liés
-            List<cell> neighbors = cell.neighbors();
-            neighbors.removeIf(n -> cell.isLinked(n));
-
-            if (!neighbors.isEmpty()) {
-                // Créer un lien supplémentaire vers un voisin aléatoire
-                cell neighbor = neighbors.get(new Random().nextInt(neighbors.size()));
-                cell.link(neighbor);
+public void smartBraid() {
+    Random rand = new Random();
+    for (int r = rows / 2; r < rows; r++) {
+        for (int c = 0; c < columns; c++) {
+            cell current = get(r, c);
+            
+            if (current != null && current.links().size() == 1) {
+                List<cell> potentialNeighbors = current.neighbors();
+                // On ne garde que les voisins non liés
+                potentialNeighbors.removeIf(current::isLinked);
                 
-                // Maintenir la symétrie pour Pacman
-                cell symCell = get((rows - 1) - cell.row, cell.column);
-                cell symNeighbor = get((rows - 1) - neighbor.row, neighbor.column);
-                if (symCell != null && symNeighbor != null) {
-                    symCell.link(symNeighbor);
+                Collections.shuffle(potentialNeighbors); // Aléatoire pour la variété
+                
+                for (cell neighbor : potentialNeighbors) {
+                    if (!completesRoom(current, neighbor)) {
+                        // On lie la cellule
+                        current.link(neighbor);
+                        
+                        // On applique la symétrie miroir 
+                        cell symCurrent = get((rows - 1) - current.row, current.column);
+                        cell symNeighbor = get((rows - 1) - neighbor.row, neighbor.column);
+                        if (symCurrent != null && symNeighbor != null) {
+                            symCurrent.link(symNeighbor);
+                        }
+                        
+                        break; // On a cassé le cul-de-sac, on passe à la suite
+                    }
                 }
             }
         }
-    });
+    }
+}
+
+/**
+ * Vérifie si lier 'a' et 'b' créerait un espace 2x2 vide.
+ */
+private boolean completesRoom(cell a, cell b) {
+    // Si le lien est Vertical (Nord/Sud)
+    if (a.column == b.column) {
+        return checkSide(a, b, -1) || checkSide(a, b, 1); // Check Ouest et Est
+    } 
+    // Si le lien est Horizontal (Est/Ouest)
+    else {
+        return checkAboveBelow(a, b, -1) || checkAboveBelow(a, b, 1); // Check Nord et Sud
+    }
+}
+
+private boolean checkSide(cell a, cell b, int offset) {
+    cell aSide = get(a.row, a.column + offset);
+    cell bSide = get(b.row, b.column + offset);
+    if (aSide == null || bSide == null) return false;
+    
+    // Un carré 2x2 se forme si ces 3 liens existent déjà
+    return a.isLinked(aSide) && b.isLinked(bSide) && aSide.isLinked(bSide);
+}
+
+private boolean checkAboveBelow(cell a, cell b, int offset) {
+    cell aVert = get(a.row + offset, a.column);
+    cell bVert = get(b.row + offset, b.column);
+    if (aVert == null || bVert == null) return false;
+    
+    return a.isLinked(aVert) && b.isLinked(bVert) && aVert.isLinked(bVert);
 }
 }
