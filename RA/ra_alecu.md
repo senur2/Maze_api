@@ -8,7 +8,10 @@ les algorithmes envisagés sont nombreux mais le plus prométeur est Improved Si
 lecture de la documentation fournie
 
 # Jour 2 / 13 février:
-**
+mise en place pratique de la structure et des classes et refonte de tout le code, les méthodes ect dans le nouveau model structurel. Refonte des benchmarks dans le nouveau model structurel.
+une classe labyrinth qui contient ça version graph pour les calculs de déplacement futur a été mise en place.
+cette classe contient également ça version grille que l'on utilise pour les affichage du jeux ainsi que pour la génération du graph, une classe utilitaire a été mise en place toutes les sous classe de grille ainsi que de graph ont été mises en place.
+la génération des fichiers json a été réalisée
 
 # Jour 3 / 20 février:
 **
