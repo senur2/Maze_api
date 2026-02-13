@@ -131,43 +131,40 @@ public void eachCell(Consumer<cell> block) {
         });
     }
 
-public void sidewing (int odd, int e){
-    boolean close = false;
-    for (int row = grid.length/2; row < grid.length; row++) {
+public void sidewing(int odd, int e) {
+    Random rand = new Random();
+    for (int r = rows / 2; r < rows; r++) {
         ArrayList<cell> run = new ArrayList<>();
-        ArrayList<cell> cell_up = new ArrayList<>();
-        for (cell cell : grid[row]) {
-            run.add(cell);
-            Random rand = new Random();
-            if (cell.west == null || rand.nextInt(100) > odd) {
-                 close = true;
-            }
-            if (close){
-                for (int i = 0; i<(run.size()/e); i++){
-                    int index = rand.nextInt(run.size());
-                    cell_up.add(run.get(index));
-                    run.remove(index);
+        
+        for (int c = 0; c < columns; c++) {
+            cell currentCell = get(r, c);
+            run.add(currentCell);
+            boolean close = (currentCell.east == null) || (rand.nextInt(100) < odd);
+
+            if (close) {
+                // Utilisation du plafond (Math.ceil) pour garantir au moins un passage
+                int nbPassages = (int) Math.ceil((double) run.size() / e);
+                
+                for (int i = 0; i < nbPassages; i++) {
+                    if (run.isEmpty()) break;
+                    cell picked = run.remove(rand.nextInt(run.size()));
+    
+                    if (picked.north != null) {
+                        picked.link(picked.north);
+                        cell sym = get((rows - 1) - picked.row, picked.column);
+                        if (sym != null && sym.south != null) {
+                            sym.link(sym.south);
+                        }
+                    }
                 }
-            while (cell_up.size() > 0){
-                cell picked_cell = cell_up.remove(0);
-                cell sym_cell = get((rows - 1) - cell.row, cell.column);
-                if (picked_cell.north != null){
-                    picked_cell.link(picked_cell.north);
-                }
-                if (sym_cell.south != null){
-                    sym_cell.link(sym_cell.south);
-                }
-            }
-            close = false;
-            run.clear();
-            }
-            else {
-                cell sym_cell = get((rows - 1) - cell.row, cell.column);
-                if (sym_cell.east != null){
-                    sym_cell.link(sym_cell.east);
-                }
-                if (cell.east != null){
-                        cell.link(cell.east);
+                run.clear();
+            } else {
+                if (currentCell.east != null) {
+                    currentCell.link(currentCell.east);
+                    cell sym = get((rows - 1) - currentCell.row, currentCell.column);
+                    if (sym != null && sym.east != null) {
+                        sym.link(sym.east);
+                    }
                 }
             }
         }
