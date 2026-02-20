@@ -111,6 +111,61 @@ public class Benchmark {
     }
 
 
+    /**
+     * Calcule la longueur moyenne des couloirs ayant une taille supérieure ou égale à minLength.
+     * Un couloir est défini comme une suite ininterrompue de cases ayant exactement 2 voisins.
+     * * @param minLength La longueur minimale pour qu'un segment soit considéré comme un couloir (ex: 5).
+     * @return La longueur moyenne des couloirs, ou 0.0 si aucun couloir ne correspond au critère.
+     */
+    public double averageCorridorLength(int minLength) {
+        Set<Noeud> visitedCorridorCells = new HashSet<>();
+        int totalLength = 0;
+        int validCorridorCount = 0;
+
+        int rows = grille.getRows();
+        int cols = grille.getColumns();
+
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < cols; c++) {
+                Noeud startNode = grille.get(r, c);
+                
+                // On cherche un point de départ : un nœud existant, de degré 2, et non encore visité
+                if (startNode != null && startNode.getDegree() == 2 && !visitedCorridorCells.contains(startNode)) {
+                    
+                    int currentCorridorLength = 0;
+                    Queue<Noeud> queue = new LinkedList<>();
+                    
+                    // Démarrage du BFS pour explorer ce couloir spécifique
+                    queue.offer(startNode);
+                    visitedCorridorCells.add(startNode);
+
+                    while (!queue.isEmpty()) {
+                        Noeud current = queue.poll();
+                        currentCorridorLength++;
+
+                        for (Noeud neighbor : current.getVoisins()) {
+                            // On continue l'exploration uniquement sur les voisins de degré 2 non visités
+                            if (neighbor != null && neighbor.getDegree() == 2 && !visitedCorridorCells.contains(neighbor)) {
+                                visitedCorridorCells.add(neighbor);
+                                queue.offer(neighbor);
+                            }
+                        }
+                    }
+
+                    // Vérification du seuil critique demandé
+                    if (currentCorridorLength >= minLength) {
+                        totalLength += currentCorridorLength;
+                        validCorridorCount++;
+                    }
+                }
+            }
+        }
+
+        // Prévention de la division par zéro
+        return validCorridorCount == 0 ? 0.0 : (double) totalLength / validCorridorCount;
+    }
+
+    
     public void print() {
         System.out.println("=== Maze Metrics ===");
         System.out.println("Connected component size  : " + mainConnectedComponentSize());
@@ -118,6 +173,7 @@ public class Benchmark {
         System.out.println("Dead-end count            : " + deadEndCount());
         System.out.println("Has cycles                : " + hasCycles());
         System.out.println("Open zones (2x2)         : " + countOpenZones());
+        System.out.println("Average corridor length   : " + String.format("%.2f", averageCorridorLength(3)));
         System.out.println();
     }
 }
