@@ -14,15 +14,36 @@ import java.io.File;
 // adapté pour utiliser les Noeud de Proto (et non plus Cell de Proto2).
 public class Grille {
 
-    private final int rows;//a supprimer
-    private final int columns;//a suprimer
-    // la structure du labyrinthe est portée uniquement par la grille de Noeud et leurs lien
+    private final int rows;// a supprimer
+    private final int columns;// a suprimer
+    // la structure du labyrinthe est portée uniquement par la grille de Noeud et
+    // leurs lien
     private final Noeud[][] grid; // grille interne de Noeud
-    private final Random random = new Random();
+    private final Random random;
 
+    /**
+     * Constructeur par défaut : utilise une graine aléatoire basée sur
+     * l'horloge système. Le labyrinthe sera différent à chaque exécution.
+     */
     public Grille(int rows, int columns) {
+        this(rows, columns, System.currentTimeMillis());
+    }
+
+    /**
+     * Constructeur avec graine (seed) pour la reproductibilité.
+     * Appelé par MazeRunner lorsque l'utilisateur fournit --seed.
+     *
+     * Avec le même seed, les méthodes sidewing() et smartBraid()
+     * produiront exactement le même labyrinthe à chaque exécution.
+     *
+     * @param rows    nombre de lignes
+     * @param columns nombre de colonnes
+     * @param seed    graine aléatoire (ex: 42 pour un résultat reproductible)
+     */
+    public Grille(int rows, int columns, long seed) {
         this.rows = rows;
         this.columns = columns;
+        this.random = new Random(seed);
         this.grid = prepareGrid();
         configureCells();
     }
@@ -55,8 +76,8 @@ public class Grille {
 
                 Noeud north = get(r - 1, c);
                 Noeud south = get(r + 1, c);
-                Noeud west  = get(r, c - 1);
-                Noeud east  = get(r, c + 1);
+                Noeud west = get(r, c - 1);
+                Noeud east = get(r, c + 1);
 
                 // Si pas de voisin au nord, on trace le mur extérieur haut
                 if (north == null) {
@@ -105,17 +126,23 @@ public class Grille {
             for (int c = 0; c < columns; c++) {
                 Noeud cell = grid[r][c];
 
-                if (r - 1 >= 0) cell.setVoisinPotentiel(0, grid[r - 1][c]); // nord
-                if (c + 1 < columns) cell.setVoisinPotentiel(1, grid[r][c + 1]); // est
-                if (r + 1 < rows) cell.setVoisinPotentiel(2, grid[r + 1][c]); // sud
-                if (c - 1 >= 0) cell.setVoisinPotentiel(3, grid[r][c - 1]); // ouest
+                if (r - 1 >= 0)
+                    cell.setVoisinPotentiel(0, grid[r - 1][c]); // nord
+                if (c + 1 < columns)
+                    cell.setVoisinPotentiel(1, grid[r][c + 1]); // est
+                if (r + 1 < rows)
+                    cell.setVoisinPotentiel(2, grid[r + 1][c]); // sud
+                if (c - 1 >= 0)
+                    cell.setVoisinPotentiel(3, grid[r][c - 1]); // ouest
             }
         }
     }
 
     public Noeud get(int row, int column) {
-        if (row < 0 || row >= rows) return null;
-        if (column < 0 || column >= columns) return null;
+        if (row < 0 || row >= rows)
+            return null;
+        if (column < 0 || column >= columns)
+            return null;
         return grid[row][column];
     }
 
@@ -139,22 +166,23 @@ public class Grille {
 
     // Algorithme Sidewinder adapté à Noeud
     public void sidewing(int odd, int e) {
-        Random rand = new Random();
+        Random rand = this.random;
         for (int r = rows / 2; r < rows; r++) {
             ArrayList<int[]> run = new ArrayList<>(); // stocke les coordonnées (row, col)
-            
+
             for (int c = 0; c < columns; c++) {
                 Noeud currentCell = get(r, c);
-                run.add(new int[]{r, c});
+                run.add(new int[] { r, c });
                 boolean eastExists = (c + 1 < columns);
                 boolean close = (!eastExists) || (rand.nextInt(100) < odd);
 
                 if (close) {
                     // Utilisation du plafond (Math.ceil) pour garantir au moins un passage
                     int nbPassages = (int) Math.ceil((double) run.size() / e);
-                    
+
                     for (int i = 0; i < nbPassages; i++) {
-                        if (run.isEmpty()) break;
+                        if (run.isEmpty())
+                            break;
                         int[] pickedCoords = run.remove(rand.nextInt(run.size()));
                         int pr = pickedCoords[0];
                         int pc = pickedCoords[1];
@@ -192,39 +220,45 @@ public class Grille {
 
     // Renvoie vrai si deux Noeud sont déjà liés (via leur liste de voisins)
     private boolean isLinked(Noeud a, Noeud b) {
-        if (a == null || b == null) return false;
+        if (a == null || b == null)
+            return false;
         return a.getVoisins().contains(b);
     }
 
     // Lie deux noeuds verticalement (nord/sud)
     private void linkVertical(Noeud north, Noeud south) {
-        if (north == null || south == null) return;
+        if (north == null || south == null)
+            return;
         north.ajouterVoisin(2, south); // sud de north
         south.ajouterVoisin(0, north); // nord de south
     }
 
     // Lie deux noeuds horizontalement (ouest/est)
     private void linkHorizontal(Noeud west, Noeud east) {
-        if (west == null || east == null) return;
+        if (west == null || east == null)
+            return;
         west.ajouterVoisin(1, east); // est de west
         east.ajouterVoisin(3, west); // ouest de east
     }
 
     public void smartBraid() {
-        Random rand = new Random();
+        Random rand = this.random;
 
         // On parcourt la moitié inférieure comme dans sidewing
         for (int r = rows / 2; r < rows; r++) {
             for (int c = 0; c < columns; c++) {
                 Noeud current = get(r, c);
-                if (current == null) continue;
+                if (current == null)
+                    continue;
 
                 // On ne traite que les culs-de-sac (degré 1)
                 int degree = 0;
                 for (Noeud v : current.getVoisins()) {
-                    if (v != null) degree++;
+                    if (v != null)
+                        degree++;
                 }
-                if (degree != 1) continue;
+                if (degree != 1)
+                    continue;
 
                 // Candidats : voisins potentiels non encore liés
                 ArrayList<Noeud> voisinsPotentiels = current.getVoisinsPotentiels();
@@ -235,7 +269,8 @@ public class Grille {
                     }
                 }
 
-                // On essaie les candidats dans un ordre aléatoire, en évitant de créer des pièces 2x2
+                // On essaie les candidats dans un ordre aléatoire, en évitant de créer des
+                // pièces 2x2
                 while (!candidats.isEmpty()) {
                     int idx = rand.nextInt(candidats.size());
                     Noeud voisinChoisi = candidats.remove(idx);
@@ -307,7 +342,8 @@ public class Grille {
         }
     }
 
-    // Vérifie si lier les cellules (ar,ac) et (br,bc) créerait une pièce 2x2 ouverte
+    // Vérifie si lier les cellules (ar,ac) et (br,bc) créerait une pièce 2x2
+    // ouverte
     private boolean completesRoom(int ar, int ac, int br, int bc) {
         if (ac == bc) {
             // Lien vertical (Nord/Sud)
@@ -321,11 +357,13 @@ public class Grille {
     private boolean checkSide(int ar, int ac, int br, int bc, int offset) {
         Noeud a = get(ar, ac);
         Noeud b = get(br, bc);
-        if (a == null || b == null) return false;
+        if (a == null || b == null)
+            return false;
 
         Noeud aSide = get(ar, ac + offset);
         Noeud bSide = get(br, bc + offset);
-        if (aSide == null || bSide == null) return false;
+        if (aSide == null || bSide == null)
+            return false;
 
         // Un carré 2x2 se forme si ces 3 liens existent déjà
         return isLinked(a, aSide) && isLinked(b, bSide) && isLinked(aSide, bSide);
@@ -334,11 +372,13 @@ public class Grille {
     private boolean checkAboveBelow(int ar, int ac, int br, int bc, int offset) {
         Noeud a = get(ar, ac);
         Noeud b = get(br, bc);
-        if (a == null || b == null) return false;
+        if (a == null || b == null)
+            return false;
 
         Noeud aVert = get(ar + offset, ac);
         Noeud bVert = get(br + offset, bc);
-        if (aVert == null || bVert == null) return false;
+        if (aVert == null || bVert == null)
+            return false;
 
         return isLinked(a, aVert) && isLinked(b, bVert) && isLinked(aVert, bVert);
     }
