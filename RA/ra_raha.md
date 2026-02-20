@@ -6,7 +6,18 @@
 
 
 # Jour 2 / 13 février:
-**
+Système de contraintes structurelles
+Générateur Pac-Man structuré
+Support tunnels dans Maze
+Support zones bloquées dans Maze
+Option --pacman-structure
+Décrochages verticaux
+Boucle centrale forcée
+Auto-génération images PNG
+Longueur moyenne des couloirs
+Compteur couloirs longs
+Score qualité Pac-Man
+Tortuosité moyenne des chemins
 
 # Jour 3 / 20 février:
 **
