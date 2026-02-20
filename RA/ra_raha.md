@@ -20,7 +20,23 @@ Score qualité Pac-Man
 Tortuosité moyenne des chemins
 
 # Jour 3 / 20 février:
-**
+Programme exécutable en local sans IDE via java -jar avec paramètres.
+
+Implémentation complète de l’interface terminal (CLI).
+
+Parsing et validation des arguments en ligne de commande (width, height, seed, algo, odd, e, out).
+
+Gestion des erreurs et messages clairs en cas de paramètres invalides.
+
+Ajout du support du paramètre --seed pour garantir la reproductibilité.
+
+Mise en place d’une architecture modulaire (séparation parsing / config / exécution).
+
+Préparation du point d’intégration pour le module JSON (non implémenté par moi).
+
+Étude du tutoriel Render pour le déploiement.
+
+Configuration du projet pour exécution en tant que Web Service.
 
 # Jour 4 / 6 mars:
 **
