@@ -36,7 +36,7 @@ public class Benchmark {
     public double mainConnectedComponentRatio() {
         return (double) mainConnectedComponentSize() / grille.size();
     }
-    
+
     public boolean hasCycles() {
         Set<Noeud> visited = new HashSet<>();
         // On parcourt toutes les cellules au cas où le labyrinthe ne serait pas totalement connecté
@@ -193,7 +193,7 @@ public class Benchmark {
         System.out.println("Open zones (2x2)          : " + countOpenZones());
         
         // Nouvelle métrique (avec un seuil à 5 cases)
-        System.out.println("Avg Corridor Length (>=5) : " + String.format("%.2f", averageCorridorLength(5)));
+        System.out.println("Avg Corridor Length (>=3) : " + String.format("%.2f", averageCorridorLength(3)));
         System.out.println();
     }
 }

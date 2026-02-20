@@ -210,9 +210,6 @@
         }
     }
 
-    // ==========================================
-    // 2. TRESSAGE INTELLIGENT (SMART BRAID)
-    // ==========================================
     public void smartBraid() {
         Random rand = new Random();
 
@@ -263,9 +260,7 @@
         }
     }
 
-    // ==========================================
-    // 3. CASSURE DES COULOIRS & EMBRANCHEMENT
-    // ==========================================
+  
     public void breakLongCorridors(int maxLength) {
         Set<Noeud> visited = new HashSet<>();
 
@@ -495,9 +490,6 @@
             removeHorizontalLink(get(r, startC - 1), get(r, startC)); // Scelle l'Ouest
             removeHorizontalLink(get(r, endC - 1), get(r, endC));     // Scelle l'Est
         }
-
-        // ÉTAPE 3 : Percer les portes pour maintenir la connexité du graphe
-        // On perce une double porte au milieu du mur Ouest et du mur Est pour la symétrie
         int midR = startR + 2; 
 
         // Portes Ouest (gauche)
