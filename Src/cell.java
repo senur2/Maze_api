@@ -1,4 +1,4 @@
-package com.maze;
+package Src;
 
 import java.util.ArrayList;
 import java.util.HashMap;

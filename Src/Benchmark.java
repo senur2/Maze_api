@@ -1,30 +1,30 @@
-package com.maze;
+package Src;
 
 import java.util.*;
 
 public class Benchmark {
-    private final maze mazeInstance;
+    private final Grille grille;
 
-    public Benchmark(maze mazeInstance) {
-        this.mazeInstance = mazeInstance;
+    public Benchmark(Grille grille) {
+        this.grille = grille;
     }
 
     public int mainConnectedComponentSize() {
-        cell startCell = mazeInstance.get(0, 0);
+        Noeud startCell = grille.get(0, 0);
         if (startCell == null) return 0;
 
-        Set<cell> visited = new HashSet<>();
-        Queue<cell> queue = new LinkedList<>();
+        Set<Noeud> visited = new HashSet<>();
+        Queue<Noeud> queue = new LinkedList<>();
 
         queue.offer(startCell);
         visited.add(startCell);
         int count = 0;
 
         while (!queue.isEmpty()) {
-            cell current = queue.poll();
+            Noeud current = queue.poll();
             count++;
-            for (cell neighbor : current.links()) {
-                if (!visited.contains(neighbor)) {
+            for (Noeud neighbor : current.getVoisins()) {
+                if (neighbor != null && !visited.contains(neighbor)) {
                     visited.add(neighbor);
                     queue.offer(neighbor);
                 }
@@ -34,30 +34,16 @@ public class Benchmark {
     }
 
     public double mainConnectedComponentRatio() {
-        return (double) mainConnectedComponentSize() / mazeInstance.size();
+        return (double) mainConnectedComponentSize() / grille.size();
     }
-
-    /**
-     * Compte les cul-de-sac.
-     * Le papier de recherche souligne que l'Improved Sidewinder réduit ce nombre[cite: 85, 123].
-     */
-    public int deadEndCount() {
-        // On utilise un tableau à un seul élément pour contourner la restriction effective final des lambdas
-        final int[] count = {0};
-        mazeInstance.eachCell(cell -> {
-            if (cell.links().size() == 1) {
-                count[0]++;
-            }
-        });
-        return count[0];
-    }
-
+    
     public boolean hasCycles() {
-        Set<cell> visited = new HashSet<>();
+        Set<Noeud> visited = new HashSet<>();
         // On parcourt toutes les cellules au cas où le labyrinthe ne serait pas totalement connecté
-        for (int r = 0; r < mazeInstance.getRows(); r++) {
-            for (int c = 0; c < mazeInstance.getColumns(); c++) {
-                cell start = mazeInstance.get(r, c);
+        for (int r = 0; r < grille.getRows(); r++) {
+            for (int c = 0; c < grille.getColumns(); c++) {
+                Noeud start = grille.get(r, c);
+                if (start == null) continue;
                 if (!visited.contains(start)) {
                     if (detectCycleDfs(start, null, visited)) {
                         return true;
@@ -68,10 +54,11 @@ public class Benchmark {
         return false;
     }
 
-    private boolean detectCycleDfs(cell current, cell parent, Set<cell> visited) {
+    private boolean detectCycleDfs(Noeud current, Noeud parent, Set<Noeud> visited) {
         visited.add(current);
 
-        for (cell neighbor : current.links()) {
+        for (Noeud neighbor : current.getVoisins()) {
+            if (neighbor == null) continue;
             if (neighbor == parent) continue;
 
             if (visited.contains(neighbor)) {
@@ -88,20 +75,20 @@ public class Benchmark {
 
     public int countOpenZones() {
         int openZones = 0;
-        int rows = mazeInstance.getRows();
-        int cols = mazeInstance.getColumns();
+        int rows = grille.getRows();
+        int cols = grille.getColumns();
 
     // On parcourt la grille jusqu'à l'avant-dernière ligne/colonne
         for (int r = 0; r < rows - 1; r++) {
             for (int c = 0; c < cols - 1; c++) {
-                cell a = mazeInstance.get(r, c);
-                cell b = mazeInstance.get(r, c + 1);     // Est de A
-                cell d = mazeInstance.get(r + 1, c);     // Sud de A
-                cell eCell = mazeInstance.get(r + 1, c + 1); // Sud de B / Est de D
+                Noeud a = grille.get(r, c);
+                Noeud b = grille.get(r, c + 1);     // Est de A
+                Noeud d = grille.get(r + 1, c);     // Sud de A
+                Noeud eCell = grille.get(r + 1, c + 1); // Sud de B / Est de D
 
                 if (a != null && b != null && d != null && eCell != null) {
                     // Vérification du carré 2x2 interconnecté
-                    if (a.isLinked(b) && a.isLinked(d) && b.isLinked(eCell) && d.isLinked(eCell)) {
+                    if (isLinked(a, b) && isLinked(a, d) && isLinked(b, eCell) && isLinked(d, eCell)) {
                         openZones++;
                     }
                 }
@@ -110,6 +97,23 @@ public class Benchmark {
     return openZones;
     }
 
+    // Vérifie si deux noeuds sont liés (voisins dans le graphe de la grille)
+    private boolean isLinked(Noeud a, Noeud b) {
+        if (a == null || b == null) return false;
+        return a.getVoisins().contains(b);
+    }
+
+
+    private int getDegree(Noeud cell) {
+        if (cell == null) return 0;
+        int degree = 0;
+        for (Noeud neighbor : cell.getVoisins()) {
+            if (neighbor != null) {
+                degree++;
+            }
+        }
+        return degree;
+    }
 
     /**
      * Calcule la longueur moyenne des couloirs ayant une taille supérieure ou égale à minLength.
@@ -130,7 +134,7 @@ public class Benchmark {
                 Noeud startNode = grille.get(r, c);
                 
                 // On cherche un point de départ : un nœud existant, de degré 2, et non encore visité
-                if (startNode != null && startNode.getDegree() == 2 && !visitedCorridorCells.contains(startNode)) {
+                if (startNode != null && getDegree(startNode) == 2 && !visitedCorridorCells.contains(startNode)) {
                     
                     int currentCorridorLength = 0;
                     Queue<Noeud> queue = new LinkedList<>();
@@ -145,7 +149,7 @@ public class Benchmark {
 
                         for (Noeud neighbor : current.getVoisins()) {
                             // On continue l'exploration uniquement sur les voisins de degré 2 non visités
-                            if (neighbor != null && neighbor.getDegree() == 2 && !visitedCorridorCells.contains(neighbor)) {
+                            if (neighbor != null && getDegree(neighbor) == 2 && !visitedCorridorCells.contains(neighbor)) {
                                 visitedCorridorCells.add(neighbor);
                                 queue.offer(neighbor);
                             }
@@ -165,15 +169,31 @@ public class Benchmark {
         return validCorridorCount == 0 ? 0.0 : (double) totalLength / validCorridorCount;
     }
 
-    
+    // Version refactorisée et plus lisible de ton compteur de culs-de-sac
+    public int deadEndCount() {
+        int count = 0;
+        for (int r = 0; r < grille.getRows(); r++) {
+            for (int c = 0; c < grille.getColumns(); c++) {
+                Noeud cell = grille.get(r, c);
+                if (cell != null && getDegree(cell) == 1) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
+    // Mise à jour de l'affichage
     public void print() {
         System.out.println("=== Maze Metrics ===");
         System.out.println("Connected component size  : " + mainConnectedComponentSize());
         System.out.println("Connected component ratio : " + String.format("%.3f", mainConnectedComponentRatio()));
         System.out.println("Dead-end count            : " + deadEndCount());
         System.out.println("Has cycles                : " + hasCycles());
-        System.out.println("Open zones (2x2)         : " + countOpenZones());
-        System.out.println("Average corridor length   : " + String.format("%.2f", averageCorridorLength(3)));
+        System.out.println("Open zones (2x2)          : " + countOpenZones());
+        
+        // Nouvelle métrique (avec un seuil à 5 cases)
+        System.out.println("Avg Corridor Length (>=5) : " + String.format("%.2f", averageCorridorLength(5)));
         System.out.println();
     }
 }

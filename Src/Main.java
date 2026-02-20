@@ -10,7 +10,7 @@ public class Main {
             Benchmark benchmark = new Benchmark(grille);
             benchmark.print();
             grille.carveCentralRoom(); // Ajout de la salle centrale
-            Labirinthe lab = Utilitaire.genererLabirinthe(grille);
+            Labyrinthe lab = Utilitaire.genererLabyrinthe(grille);
             Utilitaire.renderPacman(lab, 10);
             grille.renderMaze(20);
             lab.renderGraphe(20);
