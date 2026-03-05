@@ -383,11 +383,6 @@
             }
         }
 
-        /**
-         * Tente de créer un nouveau lien depuis le nœud ciblé vers un voisin non connecté.
-         * Applique la même logique de vérification (2x2) et de symétrie que smartBraid.
-         * @return true si un lien a pu être créé, false sinon.
-         */
         private boolean attemptToBranchOut(Noeud current) {
             int r = current.getRow(); 
             int c = current.getCol(); 
