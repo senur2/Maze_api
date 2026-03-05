@@ -37,6 +37,34 @@ public class Benchmark {
         return (double) mainConnectedComponentSize() / grille.size();
     }
 
+    /**
+     * Compte les cul-de-sac.
+     * Le papier de recherche souligne que l'Improved Sidewinder réduit ce nombre[cite: 85, 123].
+     */
+    public int deadEndCount() {
+        int count = 0;
+        int rows = grille.getRows();
+        int cols = grille.getColumns();
+
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < cols; c++) {
+                Noeud cell = grille.get(r, c);
+                if (cell == null) continue;
+
+                int degree = 0;
+                for (Noeud neighbor : cell.getVoisins()) {
+                    if (neighbor != null) {
+                        degree++;
+                    }
+                }
+                if (degree == 1) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
     public boolean hasCycles() {
         Set<Noeud> visited = new HashSet<>();
         // On parcourt toutes les cellules au cas où le labyrinthe ne serait pas totalement connecté
@@ -104,96 +132,13 @@ public class Benchmark {
     }
 
 
-    private int getDegree(Noeud cell) {
-        if (cell == null) return 0;
-        int degree = 0;
-        for (Noeud neighbor : cell.getVoisins()) {
-            if (neighbor != null) {
-                degree++;
-            }
-        }
-        return degree;
-    }
-
-    /**
-     * Calcule la longueur moyenne des couloirs ayant une taille supérieure ou égale à minLength.
-     * Un couloir est défini comme une suite ininterrompue de cases ayant exactement 2 voisins.
-     * * @param minLength La longueur minimale pour qu'un segment soit considéré comme un couloir (ex: 5).
-     * @return La longueur moyenne des couloirs, ou 0.0 si aucun couloir ne correspond au critère.
-     */
-    public double averageCorridorLength(int minLength) {
-        Set<Noeud> visitedCorridorCells = new HashSet<>();
-        int totalLength = 0;
-        int validCorridorCount = 0;
-
-        int rows = grille.getRows();
-        int cols = grille.getColumns();
-
-        for (int r = 0; r < rows; r++) {
-            for (int c = 0; c < cols; c++) {
-                Noeud startNode = grille.get(r, c);
-                
-                // On cherche un point de départ : un nœud existant, de degré 2, et non encore visité
-                if (startNode != null && getDegree(startNode) == 2 && !visitedCorridorCells.contains(startNode)) {
-                    
-                    int currentCorridorLength = 0;
-                    Queue<Noeud> queue = new LinkedList<>();
-                    
-                    // Démarrage du BFS pour explorer ce couloir spécifique
-                    queue.offer(startNode);
-                    visitedCorridorCells.add(startNode);
-
-                    while (!queue.isEmpty()) {
-                        Noeud current = queue.poll();
-                        currentCorridorLength++;
-
-                        for (Noeud neighbor : current.getVoisins()) {
-                            // On continue l'exploration uniquement sur les voisins de degré 2 non visités
-                            if (neighbor != null && getDegree(neighbor) == 2 && !visitedCorridorCells.contains(neighbor)) {
-                                visitedCorridorCells.add(neighbor);
-                                queue.offer(neighbor);
-                            }
-                        }
-                    }
-
-                    // Vérification du seuil critique demandé
-                    if (currentCorridorLength >= minLength) {
-                        totalLength += currentCorridorLength;
-                        validCorridorCount++;
-                    }
-                }
-            }
-        }
-
-        // Prévention de la division par zéro
-        return validCorridorCount == 0 ? 0.0 : (double) totalLength / validCorridorCount;
-    }
-
-    // Version refactorisée et plus lisible de ton compteur de culs-de-sac
-    public int deadEndCount() {
-        int count = 0;
-        for (int r = 0; r < grille.getRows(); r++) {
-            for (int c = 0; c < grille.getColumns(); c++) {
-                Noeud cell = grille.get(r, c);
-                if (cell != null && getDegree(cell) == 1) {
-                    count++;
-                }
-            }
-        }
-        return count;
-    }
-
-    // Mise à jour de l'affichage
     public void print() {
         System.out.println("=== Maze Metrics ===");
         System.out.println("Connected component size  : " + mainConnectedComponentSize());
         System.out.println("Connected component ratio : " + String.format("%.3f", mainConnectedComponentRatio()));
         System.out.println("Dead-end count            : " + deadEndCount());
         System.out.println("Has cycles                : " + hasCycles());
-        System.out.println("Open zones (2x2)          : " + countOpenZones());
-        
-        // Nouvelle métrique (avec un seuil à 5 cases)
-        System.out.println("Avg Corridor Length (>=3) : " + String.format("%.2f", averageCorridorLength(3)));
+        System.out.println("Open zones (2x2)         : " + countOpenZones());
         System.out.println();
     }
 }

@@ -1,21 +1,15 @@
 package Src;
 
 public class Main {
+
     public static void main(String[] args) {
         try {
-            Grille grille = new Grille(300, 300);
-            grille.sidewing(45, 5);
-            grille.smartBraid();
-            grille.breakLongCorridors(1);
-            Benchmark benchmark = new Benchmark(grille);
-            benchmark.print();
-            grille.carveCentralRoom(); // Ajout de la salle centrale
-            Labirinthe lab = Utilitaire.genererLabirinthe(grille);
-            Utilitaire.renderPacman(lab, 10);
-            grille.renderMaze(20);
-            lab.renderGraphe(20);
-        } catch (Exception e) {
-            e.printStackTrace();
+            MazeConfig config = ArgsParser.parse(args);
+            MazeRunner.run(config);
+        } catch (IllegalArgumentException e) {
+            System.err.println("Erreur : " + e.getMessage());
+            System.err.println("Utilisez --help pour voir les options disponibles.");
+            System.exit(1);
         }
     }
 }

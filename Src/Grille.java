@@ -17,22 +17,23 @@
     import java.awt.image.BufferedImage;
     import java.io.File;
 
-    // Générateur de labyrinthe basé sur l'algorithme Sidewinder,
-    // adapté pour utiliser les Noeud de Proto (et non plus Cell de Proto2).
-    public class Grille {
+public class Grille {
 
-        private final int rows;//a supprimer
-        private final int columns;//a suprimer
-        // la structure du labyrinthe est portée uniquement par la grille de Noeud et leurs lien
-        private final Noeud[][] grid; // grille interne de Noeud
-        private final Random random = new Random();
+    private final int rows;// a supprimer
+    private final int columns;// a suprimer
+    private final Noeud[][] grid; // grille interne de Noeud
+    private final Random random;
+    public Grille(int rows, int columns) {
+        this(rows, columns, System.currentTimeMillis());
+    }
 
-        public Grille(int rows, int columns) {
-            this.rows = rows;
-            this.columns = columns;
-            this.grid = prepareGrid();
-            configureCells();
-        }
+    public Grille(int rows, int columns, long seed) {
+        this.rows = rows;
+        this.columns = columns;
+        this.random = new Random(seed);
+        this.grid = prepareGrid();
+        configureCells();
+    }
 
         public void renderMaze(int cellSize) {
             int imgWidth = this.columns * cellSize;
