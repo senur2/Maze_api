@@ -1,0 +1,45 @@
+# Nom de notre processus automatisé
+name: CI/CD Pipeline pour Maze API
+
+# On déclenche ce script à chaque fois que tu pousses du code sur la branche 'main'
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  # 1. ÉTAPE DE CI (Intégration Continue) : On vérifie que le code fonctionne
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Récupère le code source de ton dépôt
+    - name: Checkout du code
+      uses: actions/checkout@v3
+
+    # Prépare l'environnement Java 21, qui est la version de ton projet
+    - name: Configuration de Java 21
+      uses: actions/setup-java@v3
+      with:
+        java-version: '21'
+        distribution: 'temurin' # Même distribution que dans ton Dockerfile
+        cache: maven # Optimise le temps de téléchargement des dépendances
+
+    # Compile le projet avec Maven (on reproduit ce que fait ton Dockerfile)
+    - name: Compilation avec Maven
+      run: mvn clean package -DskipTests
+
+  # 2. ÉTAPE DE CD (Déploiement Continu) : On met à jour Render
+  deploy:
+    # Cette étape a besoin que l'étape "build" soit terminée avec succès
+    needs: build
+    runs-on: ubuntu-latest
+    
+    # On exécute le déploiement uniquement si on est sur la branche 'main'
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+    # Appel de l'URL secrète de Render pour déclencher la mise à jour
+    - name: Déclenchement du déploiement Render
+      run: curl ${{ secrets.RENDER_DEPLOY_HOOK }}
