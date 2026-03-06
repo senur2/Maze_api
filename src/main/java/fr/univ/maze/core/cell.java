@@ -1,4 +1,4 @@
-package Src;
+package fr.univ.maze.core;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -1,0 +1,28 @@
+# Étape 1 : Construction (Build)
+# On utilise l'image Maven avec Java 17 pour compiler le code
+FROM maven:3.9.6-eclipse-temurin-17 AS build
+WORKDIR /app
+
+# On copie le pom.xml pour télécharger les dépendances (optimisation du cache)
+COPY pom.xml .
+RUN mvn dependency:go-offline
+
+# On copie le dossier src et on compile le projet
+COPY src ./src
+RUN mvn clean package -DskipTests
+
+# Étape 2 : Exécution (Run)
+# On utilise une image Java 17 légère pour l'exécution
+FROM eclipse-temurin:17-jre-alpine
+WORKDIR /app
+
+# On récupère le JAR généré à l'étape précédente. 
+# Le nom "maze-api-1.0.0.jar" provient de ton <artifactId> et <version>
+COPY --from=build /app/target/maze-api-1.0.0.jar app.jar
+
+# Render utilise la variable d'environnement PORT
+ENV PORT=8080
+EXPOSE $PORT
+
+# Commande de démarrage
+ENTRYPOINT ["sh", "-c", "java -Dserver.port=${PORT} -jar app.jar"]

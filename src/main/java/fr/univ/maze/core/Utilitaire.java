@@ -1,4 +1,4 @@
-package Src;
+package fr.univ.maze.core;
 
 import java.awt.Color;
 import java.awt.Graphics2D;

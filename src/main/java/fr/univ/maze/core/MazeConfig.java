@@ -1,4 +1,4 @@
-package Src;
+package fr.univ.maze.core;
 
 /**
  * Objet de configuration du labyrinthe, construit par ArgsParser.

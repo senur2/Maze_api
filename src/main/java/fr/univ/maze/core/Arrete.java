@@ -1,4 +1,4 @@
-package Src;
+package fr.univ.maze.core;
 
 public class Arrete {
     private final Noeud n1;

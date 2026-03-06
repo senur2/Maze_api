@@ -1,4 +1,4 @@
-package Src;
+package fr.univ.maze.core;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
