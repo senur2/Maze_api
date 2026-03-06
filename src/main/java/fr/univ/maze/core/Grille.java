@@ -9,17 +9,9 @@
     import java.util.Set;
 
 
-    import javax.imageio.ImageIO;
-
-    import java.awt.BasicStroke;
-    import java.awt.Color;
-    import java.awt.Graphics2D;
-    import java.awt.image.BufferedImage;
-    import java.io.File;
-
 public class Grille {
 
-    private final int rows;// a supprimer
+    private final int rows;// 
     private final int columns;// a suprimer
     private final Noeud[][] grid; // grille interne de Noeud
     private final Random random;

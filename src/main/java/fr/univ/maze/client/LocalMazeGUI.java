@@ -11,7 +11,7 @@ import fr.univ.maze.dto.MazeDTO;
 public class LocalMazeGUI {
 
     public static void main(String[] args) {
-        String apiUrl = "https://maze-api-jfik.onrender.com";
+        String apiUrl = "https://ter-s2-b.onrender.com/api/maze?width=30&height=30";
 
         try {
             System.out.println("Demande du labyrinthe au serveur cloud...");
