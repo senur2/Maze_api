@@ -35,67 +35,6 @@ public class Grille {
         configureCells();
     }
 
-        public void renderMaze(int cellSize) {
-            int imgWidth = this.columns * cellSize;
-            int imgHeight = this.rows * cellSize;
-
-            // Création de l'image
-            BufferedImage img = new BufferedImage(imgWidth + 1, imgHeight + 1, BufferedImage.TYPE_INT_RGB);
-            Graphics2D g2d = img.createGraphics();
-
-            // Fond blanc
-            g2d.setColor(Color.WHITE);
-            g2d.fillRect(0, 0, imgWidth + 1, imgHeight + 1);
-
-            // Murs noirs
-            g2d.setColor(Color.BLACK);
-            g2d.setStroke(new BasicStroke(1));
-
-            // Itération sur chaque cellule (Noeud) pour dessiner les murs
-            for (int r = 0; r < rows; r++) {
-                for (int c = 0; c < columns; c++) {
-                    Noeud cell = grid[r][c];
-
-                    int x1 = c * cellSize;
-                    int y1 = r * cellSize;
-                    int x2 = (c + 1) * cellSize;
-                    int y2 = (r + 1) * cellSize;
-
-                    Noeud north = get(r - 1, c);
-                    Noeud south = get(r + 1, c);
-                    Noeud west  = get(r, c - 1);
-                    Noeud east  = get(r, c + 1);
-
-                    // Si pas de voisin au nord, on trace le mur extérieur haut
-                    if (north == null) {
-                        g2d.drawLine(x1, y1, x2, y1);
-                    }
-                    // Si pas de voisin à l'ouest, on trace le mur extérieur gauche
-                    if (west == null) {
-                        g2d.drawLine(x1, y1, x1, y2);
-                    }
-
-                    // On trace le mur à l'EST si la cellule n'est pas liée à son voisin de droite
-                    if (!isLinked(cell, east)) {
-                        g2d.drawLine(x2, y1, x2, y2);
-                    }
-                    // On trace le mur au SUD si la cellule n'est pas liée à son voisin du bas
-                    if (!isLinked(cell, south)) {
-                        g2d.drawLine(x1, y2, x2, y2);
-                    }
-                }
-            }
-
-            g2d.dispose();
-
-            try {
-                ImageIO.write(img, "png", new File("maze.png"));
-                System.out.println("Labyrinthe généré sous : maze.png");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
         // Prépare une grille de Noeud
         protected Noeud[][] prepareGrid() {
             Noeud[][] cells = new Noeud[rows][columns];
