@@ -1,4 +1,4 @@
-package fr.univ.maze.render;
+package fr.univ.maze.client;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
